@@ -174,7 +174,13 @@ fn invalid_descriptor_and_repeated_exact_wire_do_not_create_new_authority() {
         Some(W3Error::InvalidDescriptor)
     );
     header.epoch = 7;
-    let wire = seal_v2(&signer, &recipient, header, b"dedup must be enforced by Akula").unwrap();
+    let wire = seal_v2(
+        &signer,
+        &recipient,
+        header,
+        b"dedup must be enforced by Akula",
+    )
+    .unwrap();
     let a = verify(&wire, &secret, header.recipient_id, 100, &trust).unwrap();
     let b = verify(&wire, &secret, header.recipient_id, 100, &trust).unwrap();
     assert_eq!(a.packet_digest(), b.packet_digest());
