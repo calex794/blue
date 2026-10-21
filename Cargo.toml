@@ -1,0 +1,20 @@
+[package]
+name = "akula-blue-w3"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "MIT"
+description = "Transport-independent verified WOW W3 v2 message boundary (experimental)"
+
+[lib]
+name = "akula_blue_w3"
+path = "src/lib.rs"
+
+[features]
+default = []
+
+[dependencies]
+blake3 = "1.5"
+coset = "0.4.2"
+ed25519-dalek = "2.2"
+hpke = "0.14.1"
