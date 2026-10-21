@@ -10,10 +10,8 @@
 use coset::{iana, CborSerializable, CoseSign1, CoseSign1Builder, HeaderBuilder};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use hpke::{
-    aead::ChaCha20Poly1305,
-    kdf::HkdfSha256,
-    kem::X25519HkdfSha256,
-    Deserializable, Kem, OpModeR, OpModeS, Serializable,
+    aead::ChaCha20Poly1305, kdf::HkdfSha256, kem::X25519HkdfSha256, Deserializable, Kem, OpModeR,
+    OpModeS, Serializable,
 };
 
 type X25519 = X25519HkdfSha256;
@@ -204,10 +202,9 @@ pub fn open_verified<'packet>(
         .trusted_sender_keys
         .key_for(header.sender_id, header.epoch)
         .ok_or(W3Error::UntrustedSender)?;
-    let encapsulated = <X25519 as Kem>::EncappedKey::from_bytes(
-        &packet[HEADER_BYTES..HEADER_BYTES + ENCAP_BYTES],
-    )
-    .map_err(|_| W3Error::InvalidPacket)?;
+    let encapsulated =
+        <X25519 as Kem>::EncappedKey::from_bytes(&packet[HEADER_BYTES..HEADER_BYTES + ENCAP_BYTES])
+            .map_err(|_| W3Error::InvalidPacket)?;
 
     let decrypted = hpke::single_shot_open::<ChaCha20Poly1305, HkdfSha256, X25519>(
         &OpModeR::Base,
@@ -220,8 +217,7 @@ pub fn open_verified<'packet>(
     .map_err(|_| W3Error::DecryptFailed)?;
 
     let signed = CoseSign1::from_slice(&decrypted).map_err(|_| W3Error::InvalidSignature)?;
-    if signed.protected.header.alg
-        != Some(coset::Algorithm::Assigned(iana::Algorithm::EdDSA))
+    if signed.protected.header.alg != Some(coset::Algorithm::Assigned(iana::Algorithm::EdDSA))
         || signed.unprotected != coset::Header::default()
     {
         return Err(W3Error::InvalidSignature);
