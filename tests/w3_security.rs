@@ -13,7 +13,7 @@ struct FixedKeys {
 impl TrustedSenderKeys for FixedKeys {
     fn key_for(&self, sender_id: [u8; 16], epoch: u64) -> Option<VerifyingKey> {
         if self.sender == sender_id && self.epoch == epoch {
-            self.approved.clone()
+            self.approved
         } else {
             None
         }
