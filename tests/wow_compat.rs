@@ -11,8 +11,8 @@ use akula_blue_w3::{
 use coset::{iana, CborSerializable, CoseSign1, CoseSign1Builder, HeaderBuilder};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use hpke::{
-    aead::ChaCha20Poly1305, kdf::HkdfSha256, kem::X25519HkdfSha256, Deserializable, Kem,
-    OpModeR, OpModeS, Serializable,
+    aead::ChaCha20Poly1305, kdf::HkdfSha256, kem::X25519HkdfSha256, Deserializable, Kem, OpModeR,
+    OpModeS, Serializable,
 };
 
 const WOW_HEADER: usize = 1 + 16 + 16 + 8 + 16 + 8;
@@ -97,8 +97,7 @@ fn original_wow_open(
     )
     .ok()?;
     let signed = CoseSign1::from_slice(&plaintext).ok()?;
-    if signed.protected.header.alg
-        != Some(coset::Algorithm::Assigned(iana::Algorithm::EdDSA))
+    if signed.protected.header.alg != Some(coset::Algorithm::Assigned(iana::Algorithm::EdDSA))
         || signed.unprotected != coset::Header::default()
     {
         return None;
@@ -177,14 +176,12 @@ fn independently_decoded_wow_wire_detects_modified_signature_and_ciphertext() {
     let (signer, secret, recipient, header) = fixture();
     let mut wire = seal_v2(&signer, &recipient, header, b"identity-bound").unwrap();
     wire[WOW_HEADER + WOW_ENCAP] ^= 0x20;
-    assert!(
-        original_wow_open(
-            &wire,
-            &secret,
-            header.recipient_id,
-            &signer.verifying_key(),
-            100,
-        )
-        .is_none()
-    );
+    assert!(original_wow_open(
+        &wire,
+        &secret,
+        header.recipient_id,
+        &signer.verifying_key(),
+        100,
+    )
+    .is_none());
 }
