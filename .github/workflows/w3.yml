@@ -1,0 +1,46 @@
+name: Blue W3 verification
+
+on:
+  pull_request:
+    paths:
+      - 'Cargo.toml'
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/w3.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'Cargo.toml'
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/w3.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blue-w3-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verified-w3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Reject transport stacks in cryptographic boundary
+        run: |
+          if grep -Eq '^[[:space:]]*(iroh|noq|noq-proto|noq-udp|tokio|reqwest)[[:space:]]*=' Cargo.toml; then
+            echo "Blue must stay transport independent"
+            exit 1
+          fi
+      - name: Rust format
+        run: cargo fmt --all -- --check
+      - name: W3 unit, compatibility and adversarial tests
+        run: cargo test --all-targets
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
