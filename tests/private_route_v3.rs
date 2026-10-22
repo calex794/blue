@@ -38,7 +38,8 @@ fn external_header_contains_no_sender_recipient_or_epoch() {
     let sender = SigningKey::from_bytes(&[3; 32]);
     let (secret, recipient) = new_recipient();
     let h = identity();
-    let wire = seal_private_v3(&sender, &recipient, ROUTE_TOKEN, h, b"separate recipients").unwrap();
+    let wire =
+        seal_private_v3(&sender, &recipient, ROUTE_TOKEN, h, b"separate recipients").unwrap();
     assert_eq!(wire[0], VERSION);
     assert!(wire.len() > PUBLIC_HEADER_BYTES + 32);
     assert_eq!(&wire[1..17], &h.message_id);
@@ -99,13 +100,25 @@ fn false_token_wrong_key_wrong_id_and_epoch_fail_closed() {
         )
         .err()
     };
-    assert_eq!(open(&keys, header.recipient_id, [8; 16]), Some(W3Error::WrongRecipient));
-    assert_eq!(open(&keys, [5; 16], ROUTE_TOKEN), Some(W3Error::WrongRecipient));
+    assert_eq!(
+        open(&keys, header.recipient_id, [8; 16]),
+        Some(W3Error::WrongRecipient)
+    );
+    assert_eq!(
+        open(&keys, [5; 16], ROUTE_TOKEN),
+        Some(W3Error::WrongRecipient)
+    );
     keys.epoch += 1;
-    assert_eq!(open(&keys, header.recipient_id, ROUTE_TOKEN), Some(W3Error::UntrustedSender));
+    assert_eq!(
+        open(&keys, header.recipient_id, ROUTE_TOKEN),
+        Some(W3Error::UntrustedSender)
+    );
     keys.epoch -= 1;
     keys.key = None;
-    assert_eq!(open(&keys, header.recipient_id, ROUTE_TOKEN), Some(W3Error::UntrustedSender));
+    assert_eq!(
+        open(&keys, header.recipient_id, ROUTE_TOKEN),
+        Some(W3Error::UntrustedSender)
+    );
     let (other_secret, _) = new_recipient();
     let result = open_private_v3(
         &wire,

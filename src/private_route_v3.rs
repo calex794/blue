@@ -6,13 +6,12 @@
 //! privacy problem and production Akula MUST NOT activate this lab format.
 
 use crate::{
-    OpenContext, RecipientPublic, SignedHeader, VerifiedW3, W3Error, X25519, MAX_MESSAGE_BYTES,
+    OpenContext, RecipientPublic, SignedHeader, VerifiedW3, W3Error, MAX_MESSAGE_BYTES, X25519,
 };
 use coset::{iana, CborSerializable, CoseSign1, CoseSign1Builder, HeaderBuilder};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier};
 use hpke::{
-    aead::ChaCha20Poly1305, kdf::HkdfSha256, Deserializable, Kem, OpModeR, OpModeS,
-    Serializable,
+    aead::ChaCha20Poly1305, kdf::HkdfSha256, Deserializable, Kem, OpModeR, OpModeS, Serializable,
 };
 
 /// v3 public bytes: version | opaque MessageId | opaque recipient invitation
@@ -43,7 +42,9 @@ fn parse_header(packet: &[u8]) -> Result<RouteHint, W3Error> {
     message_id.copy_from_slice(&packet[1..17]);
     token.copy_from_slice(&packet[17..33]);
     let expires_at_ms = u64::from_be_bytes(
-        packet[33..41].try_into().map_err(|_| W3Error::InvalidPacket)?,
+        packet[33..41]
+            .try_into()
+            .map_err(|_| W3Error::InvalidPacket)?,
     );
     if message_id == [0; 16]
         || token == [0; 16]
@@ -174,7 +175,11 @@ pub fn open_private_v3<'packet>(
     let mut sender_id = [0; 16];
     recipient_id.copy_from_slice(&inner[..16]);
     sender_id.copy_from_slice(&inner[16..32]);
-    let epoch = u64::from_be_bytes(inner[32..40].try_into().map_err(|_| W3Error::InvalidSignature)?);
+    let epoch = u64::from_be_bytes(
+        inner[32..40]
+            .try_into()
+            .map_err(|_| W3Error::InvalidSignature)?,
+    );
     let header = SignedHeader {
         message_id: hint.message_id,
         recipient_id,
