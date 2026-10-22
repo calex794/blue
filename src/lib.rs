@@ -7,6 +7,8 @@
 
 #![forbid(unsafe_code)]
 
+pub mod private_route_v3;
+
 use coset::{iana, CborSerializable, CoseSign1, CoseSign1Builder, HeaderBuilder};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use hpke::{
