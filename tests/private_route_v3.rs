@@ -40,7 +40,7 @@ fn external_header_contains_no_sender_recipient_or_epoch() {
     let h = identity();
     let wire = seal_private_v3(&sender, &recipient, ROUTE_TOKEN, h, b"separate recipients").unwrap();
     assert_eq!(wire[0], VERSION);
-    assert_eq!(wire.len() > PUBLIC_HEADER_BYTES + 32, true);
+    assert!(wire.len() > PUBLIC_HEADER_BYTES + 32);
     assert_eq!(&wire[1..17], &h.message_id);
     assert_eq!(&wire[17..33], &ROUTE_TOKEN);
     assert_eq!(&wire[33..41], &h.expires_at_ms.to_be_bytes());
@@ -49,7 +49,7 @@ fn external_header_contains_no_sender_recipient_or_epoch() {
     assert_ne!(&wire[17..33], &h.recipient_id);
     assert!(!wire[..PUBLIC_HEADER_BYTES]
         .windows(16)
-        .any(|window| window == h.sender_id || window == h.recipient_id));
+        .any(|window| window == h.sender_id.as_slice() || window == h.recipient_id.as_slice()));
     let hint = inspect_route(&wire).unwrap();
     assert_eq!(hint.token, ROUTE_TOKEN);
     assert_eq!(hint.message_id, h.message_id);
